@@ -1,0 +1,43 @@
+SECTIONS {		
+	.text	0x06004000 :
+	{
+		*(.text)
+                *("P")
+                *("SEGA_P")
+                *("C")
+                *("SEGA_C")
+		*(.strings)
+	}
+	
+	.rodata ALIGN(0x20) :			
+	{			
+		*(.rodata)			
+	}	
+	.tors  ALIGN(0x10) :			
+	{			
+		___ctors = . ;			
+		*(.ctors)			
+		___ctors_end = . ;			
+		___dtors = . ;			
+		*(.dtors)			
+		___dtors_end = . ;			
+	}
+			
+	.bss ALIGN(0x10) (NOLOAD):			
+	{			
+		__bstart = . ;
+		B_BGN = . ;
+		
+		*(.bss)			
+		* ( COMMON )			
+		__bend = . ;			
+		B_END = . ;
+	_end = .;			
+	}
+
+	.stack 0x060fff00 (NOLOAD):
+	{
+	        *(.stack)
+         	_stack = .;
+	}	
+}					
