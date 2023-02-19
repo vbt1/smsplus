@@ -1,5 +1,11 @@
 #include "../shared.h"
 #define SOUND 1
+#define CED 1
+/*
+#ifdef CED
+#include "snd/empty_drv.h"
+#include "snd/sn76496ced.h"
+#endif*/
 
 extern t_sms sms;
 extern t_cart cart;
@@ -71,8 +77,13 @@ static void cz80_z80_writeport16(unsigned short PortNo, unsigned char data)
         case 0x7F:
 #ifdef SOUND
 			if (sound)
-//				SN76496Write(data);
+#ifndef CED	
+//				SN76496Write(0,data);
 				PSG_Write(data);
+#else
+				sn76496_w(data);
+#endif
+
 #endif
            break;
 

@@ -17,10 +17,4 @@ l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_dma.a \
 l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_spr.a \
 l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_csh.a \
 l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_int.a \
-        l:/saturn/SBL6/SEGALIB/PCM/vbtelf/pcm_audi2.o \
-	    l:/saturn/SBL6/SEGALIB/PCM/vbtelf/pcm_drv2.o \
-	    l:/saturn/SBL6/SEGALIB/PCM/vbtelf/pcm_time2.o \
-	    l:/saturn/SBL6/SEGALIB/PCM/vbtelf/pcm_etc2.o \
-	    l:/saturn/SBL6/SEGALIB/PCM/vbtelf/pcm_mp2.o \
-	    l:/saturn/SBL6/SEGALIB/PCM/vbtelf/pcm_lib2.o \
 L:/saturn/SBL6/SEGALIB/LIB/vbtelf4/cdcrep.a

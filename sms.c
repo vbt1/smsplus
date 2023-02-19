@@ -5,6 +5,26 @@
 //#include "sega_DMA.h"    
 #undef  SCL_MAXLINE
 #define	SCL_MAXLINE	 256
+#define CED 1
+
+#ifdef CED
+#include <stdint.h>
+//typedef unsigned char uint8_t;
+//typedef uint16_t uint16;
+//typedef uint32_t uint32;
+extern uint8_t sound_driver[4188];
+extern uint32_t sound_driver_size;
+#include "snd/scsp.h"
+#include "snd/empty_drv.h"
+#include "snd/sn76496ced.h"
+#define SMPC_REG_SF             *((volatile uint8_t *)0x20100063)
+void smpc_wait_till_ready (void)
+{
+   // Wait until SF register is cleared
+   while(SMPC_REG_SF & 0x1) { }
+}
+#endif
+
 //#define DEBUG 1
 unsigned dummy_write[0x100];
 Fixed32	ls_tbl[3 * SCL_MAXLINE];

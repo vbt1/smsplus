@@ -3,6 +3,7 @@
 #ifndef ACTION_REPLAY
 #include    <sega_gfs.h>
 #endif
+#define CED 1
 
 //#define PROFILING 1
 //#define OLD_SOUND 1
@@ -61,7 +62,7 @@ Uint16 pad_asign[]={
 PER_DGT_U,PER_DGT_D,PER_DGT_R,PER_DGT_L,PER_DGT_A,PER_DGT_B,
 PER_DGT_C,PER_DGT_S,PER_DGT_X,PER_DGT_Y,PER_DGT_TR,PER_DGT_TL,
 };
-
+#define CED 1
 #ifdef SBL_ON
 volatile SysPort		*__port;;
 Uint8 *aVRAM;
@@ -84,7 +85,9 @@ void	UsrVblankIn( void )
 	if(play)
 	{
 #ifdef SOUND
+#ifndef CED
 if(sound)	PCM_MeVblIn();
+#endif
 #endif
 
 #endif
@@ -159,7 +162,9 @@ static void ss_main(void)
 	_spr2_initialize();
 	initSprites(256+48-1,192+16-1,256-1,192-1,48,16);
 	initScrolling();
-
+#ifdef CED	
+	sn76496_init();
+#endif	
 	SetVblank();
 
 	colBgAddr		= (Uint16*)SCL_AllocColRam(SCL_NBG0,OFF);
@@ -256,15 +261,19 @@ byte update_input(void)
 						{
 							sound=0;
 //							SYS_Exit(0);
+#ifndef CED
 							PCM_MeStop(pcm);
+#endif							
 //							pcm_PauseOn(pcm);
 						}
 						else
 						{
 							sound=1;
 //							pcm_PauseOn(pcm);
+#ifndef CED
 							PCM_MeSetLoop(pcm, SAMPLE);
 							PCM_MeStart(pcm);
+#endif							
 						}
 #endif
 
@@ -431,6 +440,7 @@ static void test2()
 #ifdef OLD_SOUND //
 		if(sound)
 		{
+#ifndef CED			
 			PSG_Update(&g_movie_buf[delta],  128);
 	//		SN76496Update(&g_movie_buf[delta],  128);
 	//		titi2++;
@@ -441,12 +451,20 @@ static void test2()
 			if(delta>=SAMPLE*2)//256*hz)
 				delta=0;
 			PCM_Task(pcm);
+#endif	
+
+			
+
+
+
 		}
 #else
 		if(sound)
 		{
+#ifndef CED				
 			if(vb==1) SPR_WaitEndSlaveSH();
 			SPR_RunSlaveSH((PARA_RTN*)sh2slave, NULL);
+#endif			
 			vb=1;
 		}
 #endif
@@ -507,6 +525,8 @@ static void test2()
 }
 //--------------------------------------------------------------------------------------------------------------
 #ifndef OLD_SOUND
+
+#ifndef CED	
 static void sh2slave()
 {
 //	CSH_AllClr();
@@ -520,6 +540,7 @@ static void sh2slave()
 
 	*(unsigned int*)OPEN_CSH_VAR(delta) = deltaSlave;
 }
+#endif
 #endif
 //--------------------------------------------------------------------------------------------------------------
 static void VDP2_InitVRAM(void)
@@ -578,6 +599,8 @@ static void displayMenu(void)
 	SCL_Close();
 
 #ifdef SOUND
+
+#ifndef CED
 	sndInit();
 	PCM_MeInit();
 	PcmCreatePara	para;
@@ -619,6 +642,8 @@ static void displayMenu(void)
 	PCM_MeSetLoop(pcm, SAMPLE);
 
 	if (pcm == NULL) return;
+#endif	
+	
 #endif
 
 #ifndef ACTION_REPLAY
@@ -629,7 +654,9 @@ static void displayMenu(void)
 #endif
 #ifdef SOUND
 	sound = 1;
+#ifndef CED	
 	PCM_Start(pcm);
+#endif	
 #endif
 	vsynch = 1;
 	memset(&aVRAM[0x880],0,0x20000);

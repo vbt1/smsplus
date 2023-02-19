@@ -18,8 +18,11 @@ void system_init(int rate)
 //SN76496_init(MASTER_CLOCK, 255, 44100); //VBT sample rate
 //SN76496_init(MASTER_CLOCK, 255, 30720);
 //SN76496_init(MASTER_CLOCK, 7680);
-PSG_Init(MASTER_CLOCK, 7680);
 
-//30720
+#ifndef CED	
+	PSG_Init(MASTER_CLOCK, 7680);
+#else
+//	sn76496_init();
+#endif	
 }
 

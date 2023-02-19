@@ -23,6 +23,8 @@ sl.bin
 __*
 befnew*
 bin*
+BORDEL
+bordel
 4DWARRIO
 XTETRIS
 CHAKNPOP
