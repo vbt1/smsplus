@@ -12,10 +12,10 @@
 //typedef unsigned char uint8_t;
 //typedef uint16_t uint16;
 //typedef uint32_t uint32;
-extern uint8_t sound_driver[4188];
-extern uint32_t sound_driver_size;
+//extern uint8_t sound_driver[4188];
+//extern uint32_t sound_driver_size;
 #include "snd/scsp.h"
-#include "snd/empty_drv.h"
+//#include "snd/empty_drv.h"
 #include "snd/sn76496ced.h"
 #define SMPC_REG_SF             *((volatile uint8_t *)0x20100063)
 void smpc_wait_till_ready (void)
@@ -24,6 +24,22 @@ void smpc_wait_till_ready (void)
    while(SMPC_REG_SF & 0x1) { }
 }
 #endif
+/*
+void emu_printf(const char *format, ...)
+{
+   static char emu_printf_buffer[256];
+   char *s = emu_printf_buffer;
+   volatile uint8_t *addr = (volatile uint8_t *)CS1(0x1000);
+   va_list args;
+
+   va_start(args, format);
+   (void)vsnprintf(emu_printf_buffer, 256, format, args);
+   va_end(args);
+
+   while (*s)
+      *addr = (uint8_t)*s++;
+}
+*/
 
 //#define DEBUG 1
 unsigned dummy_write[0x100];

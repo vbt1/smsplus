@@ -3,7 +3,6 @@
 	   l:/saturn/SBL6/SEGASMP/PER/SMPCLIB/per_x12.c \
 	   l:/saturn/SBL6/SEGASMP/PER/SMPCLIB/per_x22.c \
             sms.c \
-            psg.c \
             saturn/saturn.c \
             saturn/file.c \
 	    saturn/font.c \
@@ -13,8 +12,5 @@
 
 OBJS = strt/strt1_vbt.o strt/strt2_g.o raze/raze.o saturn/low.o   $(SRCS:.c=.o) 
 LIBS = l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_per.a \
-l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_dma.a \
-l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_spr.a \
-l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_csh.a \
 l:/saturn/SBL6/SEGALIB/LIB/vbtelf4/sega_int.a \
 L:/saturn/SBL6/SEGALIB/LIB/vbtelf4/cdcrep.a

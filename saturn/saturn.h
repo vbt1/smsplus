@@ -165,16 +165,17 @@ trigger_t	PER_GetTrigger( const SysDevice	*this );
 		return	( int )( this->type | this->size );
 	}
 */
-
+#define TVSTAT      (*(volatile Uint16 *)0x25F80004)
 #define SOUND 1
 #ifdef SOUND
+
+#ifndef CED
 #define	SDDRV_NAME	"SDDRVS.TSK"
 #define	SDDRV_SIZE	26624 //0x7000
 #define	SDDRV_ADDR	0x00200000//0x6080000
 #define	RING_BUF_SIZE	(2048L*10)
 #define	PCM_ADDR	((void*)0x25a20000)
 #define	PCM_SIZE	(4096L*2)
-#define TVSTAT      (*(volatile Uint16 *)0x25F80004)
 
 static Sint8 *g_movie_buf = (Sint8 *)0x25a20000;//0x04000000;
 static void sndInit(void);
@@ -196,10 +197,11 @@ static Uint32 intrflag;
 unsigned int i,j;for(i=0;i<16;i++) j=*(volatile int *)0x06000000;\
 }while(0)
 
-
 static Uint8 GetComBlockAdr(void);
 static void CopyMem(void *,void *,Uint32);
 static void DmaClrZero(void *, Uint32);
+#endif
+
 #endif
 
 #define	RGB( r, g, b )		(0x8000U|((b) << 10)|((g) << 5 )|(r))

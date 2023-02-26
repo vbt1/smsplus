@@ -162,10 +162,6 @@ static void ss_main(void)
 	_spr2_initialize();
 	initSprites(256+48-1,192+16-1,256-1,192-1,48,16);
 	initScrolling();
-#ifdef CED	
-	sn76496_init();
-#endif	
-	SetVblank();
 
 	colBgAddr		= (Uint16*)SCL_AllocColRam(SCL_NBG0,OFF);
 	colAddr			= (Uint16*)SCL_AllocColRam(SCL_SPR,OFF);
@@ -182,13 +178,31 @@ static void ss_main(void)
 	(*(Uint16 *)0x25F8009A) = 0x0003; 
 	(*(Uint16 *)0x25F80020) = 0x0303;
 
+#ifndef ACTION_REPLAY
+//		GFS_Load(GFS_NameToId("FONT.BIN"),0,(void *) FntAsciiFontData2bpp,1600);
+	GFS_Load(GFS_NameToId("FONT.BIN"),0,(void *)  FONT_ADDR,1600);
+	ChangeDir("GAMES");
+	ClrVram((volatile Uint8 *)SCL_VDP2_VRAM_A1);
+#endif
+	SetVblank();
+
 #ifndef OLD_SOUND
+#ifndef CED	
 	CSH_Init(CSH_4WAY);
 	SPR_InitSlaveSH();
+#endif	
 #endif
 	hz = get_hz();
 	displayMenu();
+
+
+
 	drawWindow(32,192,192,14,52);
+
+#ifdef CED	
+	sn76496_init();
+#endif	
+
 	*(unsigned int*)OPEN_CSH_VAR(delta) = 0;
 
 	*(Uint16 *)0x25E00000=RGB( 0, 0, 0 );//palette2[0];
@@ -380,7 +394,7 @@ static void load_rom(void)
 	else if (fileSize == 0x80000)
 //		game = (byte *) 0x06079000; // bon parametre
 //		game = (byte *) 0x0607A000;
-		game = (byte *) 0x0607D000;
+		game = (byte *) 0x0607F000;
 	else
 	{
 //		game = (byte *) 0x00202000;
@@ -391,8 +405,10 @@ static void load_rom(void)
 #endif
 
 	make_name_lut(fileSize);
+
 	cart.rom	 = &game[0];
 	cart.pages	 = fileSize /0x4000;
+
 	// vbt 15/05/2008 : exophase :	 data & cart.pages, and set cart.pages to one less than you are
 	// kills stree fighter 2
 	//cart.pages = (fileSize /0x4000)-1;
@@ -646,12 +662,6 @@ static void displayMenu(void)
 	
 #endif
 
-#ifndef ACTION_REPLAY
-//		GFS_Load(GFS_NameToId("FONT.BIN"),0,(void *) FntAsciiFontData2bpp,1600);
-	GFS_Load(GFS_NameToId("FONT.BIN"),0,(void *)  FONT_ADDR,1600);
-	ChangeDir("GAMES");
-	ClrVram((volatile Uint8 *)SCL_VDP2_VRAM_A1);
-#endif
 #ifdef SOUND
 	sound = 1;
 #ifndef CED	
@@ -666,6 +676,7 @@ static void displayMenu(void)
 	make_cram_lut();
 	make_bp_lut();
 	sms_reset();
+
 	load_rom();
 
 	system_init(0);	
@@ -1060,193 +1071,6 @@ void SPR_SetEraseData(Uint16 eraseData, Uint16 leftX, Uint16 topY,Uint16 rightX,
 	rightX++;
 	rightX >>= 3;
 	SPR_WRITE_REG(SPR_W_EWRR, (rightX << 9) + botY);   /* set erase screen right bottom */
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-void SND_Init(SndIniDt *sys_ini)
-{
-	Uint8 *adr_sys_info_tbl;
-	
-	/** BEGIN ****************************************************************/
-
-    PER_SMPC_SND_OFF();                         /* サウンドOFF               */
-    POKE_W(ADR_SCSP_REG, SCSP_REG_SET); 
-                                                /* SCSP共通ﾚｼﾞｽﾀ設定         */
-
-    DmaClrZero(ADR_SND_MEM, MEM_CLR_SIZE);      // DMAメモリゼロクリア       
-
-		CopyMem(ADR_SND_VECTOR,
-                   (void *)(SND_INI_PRG_ADR(*sys_ini)),
-                   SND_INI_PRG_SZ(*sys_ini));   // 68Kﾌﾟﾛｸﾞﾗﾑ転送            
-
-    adr_sys_info_tbl = (Uint8 *)(ADR_SND_MEM + PEEK_L(ADR_SYS_TBL +
-                                 ADR_SYS_INFO));
-                                                /* ｼｽﾃﾑ情報ﾃｰﾌﾞﾙｱﾄﾞﾚｽ取得    */
-    adr_host_int_work = (Uint8 *)(ADR_SND_MEM + PEEK_L(ADR_SYS_TBL +
-                                  ADR_HOST_INT));
-                                                
-    adr_com_block = adr_host_int_work;  /* 現在書き込みｺﾏﾝﾄﾞﾌﾞﾛｯｸｱﾄﾞﾚｽ初期化 */
-
-		CopyMem((void *)
-                    (PEEK_L(adr_sys_info_tbl + ADR_ARA_ADR) + ADR_SND_MEM),
-                   (void *)(SND_INI_ARA_ADR(*sys_ini)),
-                   CHG_LONG(SND_INI_ARA_SZ(*sys_ini))); /* ｻｳﾝﾄﾞｴﾘｱﾏｯﾌﾟ転送  */
-/* 1994/02/24 Start*/
-    intrflag = 0;         /* 割り込みフラグの初期化 */
-/* 1994/02/24 End */
-
-    PER_SMPC_SND_ON();                          /* サウンドON                */
-
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-Uint8 SND_ChgMap(Uint8 area_no)
- {
-/* 1994/02/24 Start */
-    if(intrflag) return(SND_RET_NSET);
-    intrflag = 1;
-/* 1994/02/24 End */
-    if(GetComBlockAdr() == OFF) HOST_SET_RETURN(SND_RET_NSET);
-    SET_PRM(0, area_no);                        /* パラメータセット          */
-    SET_COMMAND(COM_CHG_MAP);                   /* コマンドセット            */
-
-    while(PEEK_W(adr_com_block + ADR_COM_DATA)) _WAIT_();
-    if(GetComBlockAdr() == OFF) HOST_SET_RETURN(SND_RET_NSET);
-    SET_PRM(0, area_no);                        /* パラメータセット          */
-    SET_COMMAND(COM_CHG_MAP);                   /* コマンドセット            */
-    while(PEEK_W(adr_com_block + ADR_COM_DATA)) _WAIT_();
-    HOST_SET_RETURN(SND_RET_SET);
-}
-
-#define DMA_SCU_END     0
-//-------------------------------------------------------------------------------------------------------------------------------------
-static void CopyMem(void *dst, void *src, Uint32 cnt)
-{
-	memcpyw(dst, src, cnt);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-static void DmaClrZero(void *dst, Uint32 cnt)
-{
-	memset(dst, 0x00, cnt);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-static void sndInit(void)
-{
-	SndIniDt 	snd_init;
-	unsigned char sound_map[]={0xFF,0xFF};
-
-#ifndef ACTION_REPLAY
-	GFS_Load(GFS_NameToId(SDDRV_NAME),0,(void *) SDDRV_ADDR,SDDRV_SIZE);
-	SND_INI_PRG_ADR(snd_init) = (Uint16 *)SDDRV_ADDR;
-	SND_INI_PRG_SZ(snd_init)  = (Uint16)  SDDRV_SIZE;
-#else
-	
-	SND_INI_PRG_ADR(snd_init) = (Uint16 *)snddrv;
-	SND_INI_PRG_SZ(snd_init)  = (Uint16)  sizeof(snddrv);
-#endif
-
-	SND_INI_ARA_ADR(snd_init) 	= (Uint16 *)sound_map;
-	SND_INI_ARA_SZ(snd_init) 	= (Uint16)sizeof(sound_map);
-
-	SND_Init(&snd_init);
-	SND_ChgMap(0);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-static PcmHn createHandle(PcmCreatePara *para)
-{
-	PcmHn pcm;
-
-	pcm = PCM_CreateMemHandle(para);
-	if (pcm == NULL) {
-		return NULL;
-	}
-	PCM_NotifyWriteSize(pcm, SAMPLE*2);
-
-	return pcm;
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
- SndRet SND_ChgPcm(SndPcmChgPrm *cprm)
- {
-/* 1994/02/24 Start */
-    if(intrflag) return(SND_RET_NSET);
-    intrflag = 1;
-/* 1994/02/24 End */
-    if(GetComBlockAdr() == OFF) HOST_SET_RETURN(SND_RET_NSET);
-    SET_PRM(0, SND_PRM_NUM(*cprm));
-    SET_PRM(1, (SND_PRM_LEV(*cprm) << 5) | ChgPan(SND_PRM_PAN(*cprm)));
-    SET_PRM(2, SND_PRM_PICH(*cprm) >> 8);
-    SET_PRM(3, SND_PRM_PICH(*cprm));
-    SET_PRM(4, (SND_R_EFCT_IN(*cprm) << 3) | SND_R_EFCT_LEV(*cprm));
-    SET_PRM(5, (SND_L_EFCT_IN(*cprm) << 3) | SND_L_EFCT_LEV(*cprm));
-    SET_COMMAND(COM_CHG_PCM_PRM);               /* コマンドセット            */
-    HOST_SET_RETURN(SND_RET_SET);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-static Uint8 GetComBlockAdr(void)
-{
-    if(*NOW_ADR_COM_DATA){              /* 以前のﾌﾞﾛｯｸが引き取り済みでないか?*/
-        /* 次コマンドブロックアドレス設定処理 ********************************/
-        if(NOW_ADR_COM_DATA >= (MAX_ADR_COM_DATA - SIZE_COM_BLOCK)){
-                                                    /* 最大値か?            */
-            return OFF;                             /* ﾌﾞﾛｯｸ空き無し      */
-        }else{
-            adr_com_block += SIZE_COM_BLOCK;        /* 現在ｺﾏﾝﾄﾞﾌﾞﾛｯｸｶｳﾝﾄｱｯﾌﾟ*/
-            while(NOW_ADR_COM_DATA < (MAX_ADR_COM_DATA - SIZE_COM_BLOCK)){
-                if(*NOW_ADR_COM_DATA){
-                    adr_com_block += SIZE_COM_BLOCK;
-                }else{
-                    return ON;                      /* ﾌﾞﾛｯｸ空き有り         */
-                }
-            }
-            return OFF;                             /* ﾌﾞﾛｯｸ空き無し         */
-        }
-    }else{
-        adr_com_block = adr_host_int_work;  /* ﾌﾞﾛｯｸの先頭へ              */
-        while(NOW_ADR_COM_DATA < (MAX_ADR_COM_DATA - SIZE_COM_BLOCK)){
-            if(*NOW_ADR_COM_DATA){
-                adr_com_block += SIZE_COM_BLOCK;
-            }else{
-                return ON;                          /* ﾌﾞﾛｯｸ空き有り         */
-            }
-        }
-        return OFF;                                 /* ﾌﾞﾛｯｸ空き無し         */
-    }
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
-static Uint16 ChgPan(SndPan pan)
-{
-    return(((pan) < 0) ? (~(pan) + 0x10 + 1) : (pan));
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
- SndRet SND_StartPcm(SndPcmStartPrm *sprm, SndPcmChgPrm *cprm)
- {
-    if(intrflag) return(SND_RET_NSET);
-    intrflag = 1;
-/* 1994/02/24 End */
-    if(GetComBlockAdr() == OFF) HOST_SET_RETURN(SND_RET_NSET);
-    SET_PRM(0, SND_PRM_MODE(*sprm) | SND_PRM_NUM(*cprm));
-    SET_PRM(1, (SND_PRM_LEV(*cprm) << 5) | ChgPan(SND_PRM_PAN(*cprm)));
-    SET_PRM(2, SND_PRM_SADR(*sprm) >> 8);
-    SET_PRM(3, SND_PRM_SADR(*sprm));
-    SET_PRM(4, SND_PRM_SIZE(*sprm) >> 8);
-    SET_PRM(5, SND_PRM_SIZE(*sprm));
-    SET_PRM(6, SND_PRM_PICH(*cprm) >> 8);
-    SET_PRM(7, SND_PRM_PICH(*cprm));
-    SET_PRM(8, (SND_R_EFCT_IN(*cprm) << 3) | SND_R_EFCT_LEV(*cprm));
-    SET_PRM(9, (SND_L_EFCT_IN(*cprm) << 3) | SND_L_EFCT_LEV(*cprm));
-    SET_PRM(11, 0);
-    SET_COMMAND(COM_START_PCM);                 /* コマンドセット            */
-    HOST_SET_RETURN(SND_RET_SET);
-}
-//-------------------------------------------------------------------------------------------------------------------------------------
- SndRet SND_StopPcm(SndPcmNum pcm_num)
- {
-/* 1994/02/24 Start */
-    if(intrflag) return(SND_RET_NSET);
-    intrflag = 1;
-/* 1994/02/24 End */
-    if(GetComBlockAdr() == OFF) HOST_SET_RETURN(SND_RET_NSET);
-    SET_PRM(0, pcm_num);                        /* パラメータセット          */
-    SET_COMMAND(COM_STOP_PCM);                  /* コマンドセット            */
-    HOST_SET_RETURN(SND_RET_SET);
 }
 //-------------------------------------------------------------------------------------------------------------------------------------
 static void wait_vblank(void)

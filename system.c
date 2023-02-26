@@ -1,4 +1,5 @@
 #include "shared.h"
+#define CED 1
 //#include "stddef.h"
 
 void vdp_reset(void);

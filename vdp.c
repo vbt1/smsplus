@@ -394,7 +394,7 @@ void make_name_lut(long filesize)
 	if (filesize ==0x80000)
 		name_lut = (Uint16 *)0x00200000;
 	else
-		name_lut = (Uint16 *)0x0607D000; 
+		name_lut = (Uint16 *)0x0607F000; 
 #endif
 
 	int i, j;
