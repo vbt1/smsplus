@@ -23,7 +23,7 @@ unsigned int file_max=0;
 unsigned int vsynch=0;
 unsigned int play=0;
 #ifndef ACTION_REPLAY
-int file_id		= 8; 
+int file_id		= 2; 
 #endif
 #undef  SCL_MAXLINE
 #undef  SCL_MAXCELL
@@ -439,7 +439,8 @@ static void test2()
 #ifndef ACTION_REPLAY
 	while (1)
 	{
-//		à remettre __port = PER_OpenPort();
+//		à remettre 
+__port = PER_OpenPort();
 		play=1;
 
 		while (play)
@@ -450,7 +451,8 @@ static void test2()
 #endif
 	{
 		*(Uint16 *)0x25E00000 = colBgAddr[0]; // set bg_color
-
+//		__port = PER_OpenPort();
+	
 		sms_frame(0);
 		
 #ifdef OLD_SOUND //
