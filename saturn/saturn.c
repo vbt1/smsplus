@@ -23,7 +23,7 @@ unsigned int file_max=0;
 unsigned int vsynch=0;
 unsigned int play=0;
 #ifndef ACTION_REPLAY
-int file_id		= 4; 
+int file_id		= 8; 
 #endif
 #undef  SCL_MAXLINE
 #undef  SCL_MAXCELL

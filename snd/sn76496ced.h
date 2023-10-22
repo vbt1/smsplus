@@ -68,7 +68,7 @@ void sn76496_init()
 
     volatile uint16_t *control = (uint16_t *)0x25b00400;
     volatile uint16_t *intr = (uint16_t *)0x25b0042a;
-    control[0] = 0xf; // master vol
+    control[0] = 0x20f; // master vol
     intr[0] = 0;      // irq
 
     // init slots...
@@ -111,7 +111,8 @@ void sn76496_init()
         slot.lpctl = 1;
         slot.attack_rate = 31;
         slot.release_r = 31;
-        slot.loop_start = 1;
+//        slot.loop_start = 1;  // passage à 0 steve + ced
+        slot.loop_start = 0;
         slot.kr_scale = 0;
         slot.sdir = 0;
         slot.disdl = 7;
@@ -144,7 +145,7 @@ void sn76496_init()
     // __dbg_tuneA5(&slots[0]);
 
     // dbg...
-    if (0)
+    if (1)
     {
         // channel 0 tone 0xfe 440hz
         sn76496_w(0b10001110); // 0b1_00_0_1110
@@ -152,7 +153,7 @@ void sn76496_init()
         // set vol to max
         sn76496_w(0b10010000); // 0b1_00_1_0000
     }
-
+ //       sn76496_w(0b10010000); // 0b1_00_1_0000
     // periodic noise
     if (0)
     {
@@ -235,7 +236,8 @@ void sn76496_w(uint8_t dd)
             volatile scsp_slot_regs_t *slot = chip->noise_type ? slot_noise : slot_per;
 
             slot->kyonb = 0;
-            slot->kyonex = 0;
+//            slot->kyonex = 0;
+            slot->kyonex = 1; // vbt : modification ced + steve
 
             if (chip->noise_type)
             {
